@@ -22,8 +22,6 @@ public class Compiler {
       
       Debug.log("=== Génération de Code ===");
       final String outfile = new codegen.CodeGen(ir, infile).getResult();
-      
-      main.Debug.toBeContinued();
 
 
       if (Debug.RUNMARS) { // may be not here

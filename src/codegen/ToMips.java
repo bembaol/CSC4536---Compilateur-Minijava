@@ -154,7 +154,7 @@ public class ToMips extends IRvisitorDefault {
   
   @Override
   public void visit(final QCall q) {
-	    final int nbArg = Integer.parseInt(q.arg2.getName())+1;
+	    final int nbArg = Integer.parseInt(q.arg2.getName());
 	    if (nbArg != params.size()) {
 	      throw new main.CompilerException("ToMips : Params error");
 	    }
@@ -162,10 +162,7 @@ public class ToMips extends IRvisitorDefault {
 	      throw new main.CompilerException("ToMips : too many args " + q.arg1.getName());
 	    }
 	    callerSave();
-	    // Store up to 4 args in register
 	    for (int i = 0; i < NBARGS && i < nbArg; i++) {
-	      // pb : f(a,b) { f(b,a) } ecrasement
-	      // load saved values for $ai in offest($sp)
 	      regLoadSaved(AREGS[i], params.get(i));
 	    }
 	  mw.move(Reg.FP, Reg.SP);

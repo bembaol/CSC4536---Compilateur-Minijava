@@ -1,5 +1,6 @@
 package semantic;
 
+
 import semantic.symtab.*;
 import syntax.ast.*;
 
@@ -14,6 +15,8 @@ public class TypeChecking extends AstVisitorDefault {
   private static final String INT = main.EnumType.INT.toString();
   /** Nom de type indéfini. */
   private static final String VOID = main.EnumType.UNDEF.toString();
+  /** Nom de type tableau d'Integer. */
+  private static final String INT_ARRAY = main.EnumType.INT_ARRAY.toString();
 
   /** La structure de données de l'analyse sémantique. */
   private final SemanticTree semanticTree;
@@ -135,6 +138,54 @@ public class TypeChecking extends AstVisitorDefault {
   public void visit(final Type n) {
 	  defaultVisit(n);
 	  checkTypeName(n.name, n);
+  }
+  
+  @Override
+  public void visit(final ExprArrayLength n) {
+	  defaultVisit(n);
+	  if (!compareType(getType(n.array), INT_ARRAY)) {
+		  erreur(n, "Attempt to get the length of something else than an array");
+		  setType(n, VOID);
+		  return;
+	  }
+	  setType(n, INT);
+  }
+  
+  @Override
+  public void visit(final ExprArrayLookup n) {
+	  n.array.accept(this);
+	  if (!compareType(getType(n.array), INT_ARRAY)) {
+		  erreur(n, "Attempt to lookup in something else than an array");
+		  setType(n, VOID);
+		  return;
+	  }
+	  n.index.accept(this);
+	  if (!compareType(getType(n.index), INT)){
+		  erreur(n, "Index lookup can only be an Integer");
+		  setType(n, VOID);
+		  return;
+	  }
+	  
+	  setType(n, INT);
+	  
+  }
+  
+  @Override
+  public void visit(final ExprArrayNew n) {
+	  defaultVisit(n);
+	  if (!compareType(getType(n.size), INT)){
+		  erreur(n, "Size can only be an Integer");
+		  setType(n, VOID);
+		  return;
+	  }
+	  
+	  if (!compareType(n.type.toString(), INT_ARRAY)) {
+		  erreur(n, "Array can only contains Integer");
+		  setType(n, VOID);
+		  return;
+	  }
+	  
+	  setType(n, INT_ARRAY);
   }
   
   @Override
