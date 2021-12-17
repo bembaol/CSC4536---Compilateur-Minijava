@@ -14,6 +14,8 @@ public class TypeChecking extends AstVisitorDefault {
   private static final String INT = main.EnumType.INT.toString();
   /** Nom de type indéfini. */
   private static final String VOID = main.EnumType.UNDEF.toString();
+  /** Nom de type tableau d'Integer. */
+  private static final String INT_ARRAY = main.EnumType.INT_ARRAY.toString();
 
   /** La structure de données de l'analyse sémantique. */
   private final SemanticTree semanticTree;
@@ -135,6 +137,36 @@ public class TypeChecking extends AstVisitorDefault {
   public void visit(final Type n) {
 	  defaultVisit(n);
 	  checkTypeName(n.name, n);
+  }
+  
+  @Override
+    public void visit(final ExprArrayLength n) {
+  	  defaultVisit(n);
+  	  if (!compareType(getType(n.array), INT_ARRAY)) {
+  		  erreur(n, "Attempt to get the length of something else than an array");
+  		  setType(n, VOID);
+  		  return;
+  	  }
+  	  setType(n, INT);
+    }
+  
+  @Override
+  public void visit(final ExprArrayLookup n) {
+	  n.array.accept(this);
+	  if (!compareType(getType(n.array), INT_ARRAY)) {
+		  erreur(n, "Attempt to lookup in something else than an array");
+		  setType(n, VOID);
+		  return;
+	  }
+	  n.index.accept(this);
+	  if (!compareType(getType(n.index), INT)){
+		  erreur(n, "Index lookup can only be Integer");
+		  setType(n, VOID);
+		  return;
+	  }
+	  
+	  setType(n, INT);
+	  
   }
   
   @Override
@@ -261,6 +293,8 @@ public class TypeChecking extends AstVisitorDefault {
   @Override
   public void visit(final StmtArrayAssign n) {
 	  defaultVisit(n);
+	  String x = lookupVarType(n, n.arrayId.name);
+	  checkType(INT_ARRAY, x, "Is not an array", n);
 	  checkType(INT, getType(n.index), "Index must be an integer", n);
 	  checkType(INT, getType(n.value), "Value must be an integer", n);
   }
