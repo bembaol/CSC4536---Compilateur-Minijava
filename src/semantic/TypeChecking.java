@@ -258,6 +258,12 @@ public class TypeChecking extends AstVisitorDefault {
 	  defaultVisit(n);
 	  checkType(BOOL, getType(n.test), "Test is not a boolean", n);
   }
+  @Override
+  public void visit(final StmtArrayAssign n) {
+	  defaultVisit(n);
+	  checkType(INT, getType(n.index), "Index must be an integer", n);
+	  checkType(INT, getType(n.value), "Value must be an integer", n);
+  }
   
 
   
