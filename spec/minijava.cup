@@ -1,0 +1,205 @@
+package syntax;
+import syntax.ast.*; // définition de l'AST
+
+action code {:
+/* Classes utilitaires pour construction de paires de listes */
+  class KlassBody { /* classBody = (Var|Method)*  */
+    AstList<Var> vars;     AstList<Method> methods;
+    KlassBody() {this.vars=new AstList<>(); this.methods=new AstList<>(); }
+    AstList<Var> getVars() { return this.vars; }
+    AstList<Method> getMethods() { return this.methods; }
+  }
+  class MethBody  { /* methodBody = (Var|Stmt)*  */
+    AstList<Var> vars;     AstList<Stmt> stmts;
+    MethBody()  {this.vars=new AstList<>(); this.stmts=new AstList<>(); }
+    AstList<Var> getVars() { return this.vars; }
+    AstList<Stmt> getStmts() { return this.stmts; }
+  }
+:};
+
+/* Lexèmes (tokens) */
+terminal CLASS, MAIN, OUT, PRINTLN, PUBLIC, STATIC, STRING, SYSTEM, VOID ;
+terminal DOT, SEMI, LB, RB, LC, RC, LP, RP ;
+terminal BOOL, ELSE, EXTENDS, IF, INT, NEW, RETURN, THIS, WHILE ;
+terminal AND, ASSIGN, LESS, MINUS, NOT, PLUS, TIMES, COMMA ;
+/* Lexèmes avec valeur sémantique */
+terminal Integer LIT_INT ;
+terminal String  IDENT ;
+terminal Boolean LIT_BOOL ;
+/* Variables et Arbre de syntaxe */
+nonterminal Axiom           axiom;
+nonterminal KlassMain       klassMain;
+nonterminal Ident           ident;
+nonterminal AstList<Klass>  klassList;
+nonterminal Klass           klass;
+nonterminal Ident           parent;
+nonterminal KlassBody       klassBody; // helpers class pour double liste
+nonterminal Method          method;
+nonterminal MethBody        methBody;  // helpers class pour double liste
+nonterminal Type            type;
+nonterminal Var             variable;
+nonterminal Formal          formal;
+nonterminal AstList<Formal> formals, formals1;
+nonterminal AstList<Expr>   args, args1; 
+nonterminal Stmt            stmt; 
+nonterminal Expr            expr; 
+
+precedence right ASSIGN;              
+precedence left  AND;                 
+precedence left  LESS;                
+precedence left  PLUS, MINUS;         
+precedence left  TIMES;               
+precedence right NOT;                 
+precedence left  DOT, LB, RB, LP, RP;
+/*  Productions */
+axiom     ::= klassMain:a klassList:z
+                  {: RESULT = new Axiom(a, z);
+                     RESULT.addPosition(axleft, zxright); :}
+;
+klassMain ::= CLASS:a ident:b LC PUBLIC STATIC VOID MAIN
+              LP STRING LB RB ident:c RP LC stmt:d RC RC:z
+                  {: RESULT = new KlassMain(b, c, d);
+                     RESULT.addPosition(axleft, zxright); :}
+;
+ident     ::= IDENT:a
+                  {: RESULT = new Ident(a);
+                     RESULT.addPosition(axleft, axright);                         :}
+;
+klassList ::= /* vide */
+                  {: RESULT = new AstList<>();            :}
+           |  klassList:a klass:z
+                  {: RESULT = a; RESULT.add(z);
+                     RESULT.addPosition(axleft, zxright); :}
+;
+klass     ::= CLASS:a ident:i parent:p LC klassBody:k RC:z
+                  {: RESULT = new Klass(i, p, k.getVars(), k.getMethods());       
+                     RESULT.addPosition(axleft, zxright); :}
+;
+parent    ::= /* mot vide */
+                 {: RESULT = new Ident("Object"); :}
+             | EXTENDS:a ident:z
+                 {: RESULT = z;
+                    RESULT.addPosition(axleft, zxright); :}
+;
+klassBody ::= /* vide */
+                  {: RESULT = new KlassBody();            :}
+           |  klassBody:a variable:z
+                  {: RESULT = a; RESULT.vars.add(z);      :}
+           |  klassBody:a method:z
+                  {: RESULT = a; RESULT.methods.add(z);   :}
+;
+method      ::= PUBLIC:a type:t ident:i LP formals:f RP
+              LC methBody:m RETURN expr:e SEMI RC:z
+                  {: RESULT = new Method(t, i, f, m.getVars(), m.getStmts(), e);
+                     RESULT.addPosition(axleft, zxright);                        :}
+;
+methBody  ::= /* vide */
+                  {: RESULT = new MethBody();             :}
+           |  methBody:a variable:z
+                  {: RESULT = a; RESULT.vars.add(z);      :}
+           |  methBody:a stmt:z
+                  {: RESULT = a; RESULT.stmts.add(z);     :}
+;
+variable  ::= type:a ident:b SEMI:z
+                  {: RESULT = new Var(a, b);
+                     RESULT.addPosition(axleft, zxright); :}
+;
+type      ::= IDENT:a
+                  {: RESULT = new Type(a);
+                     RESULT.addPosition(axleft, axright); :}
+           |  INT:a
+                  {: RESULT = new Type(main.EnumType.INT);
+                     RESULT.addPosition(axleft, axright); :}
+           |  BOOL:a
+                  {: RESULT = new Type(main.EnumType.BOOL);
+                     RESULT.addPosition(axleft, axright); :}
+;
+// liste éventuellement vide avec Virgule
+formal    ::= type:a ident:z
+                  {: RESULT = new Formal(a, z);
+                     RESULT.addPosition(axleft, zxright); :}
+;
+formals   ::= /* vide */
+                  {: RESULT = new AstList<>(); :}
+           |  formals1:a
+                  {: RESULT = a;
+                     RESULT.addPosition(axleft, axright); :}
+;
+formals1  ::= formal:a
+                  {: RESULT = new AstList<>(); RESULT.add(a);
+                     RESULT.addPosition(axleft, axright); :}
+           |  formals1:a COMMA formal:z
+                  {: RESULT = a; RESULT.add(z);
+                     RESULT.addPosition(axleft, zxright); :}
+;
+args      ::= /* vide */
+                  {: RESULT = new AstList<>(); :}
+           |  args1:a
+                  {: RESULT = a;
+                     RESULT.addPosition(axleft, axright); :}
+;
+args1     ::= expr:a
+                  {: RESULT = new AstList<>(); RESULT.add(a);
+                     RESULT.addPosition(axleft, axright); :}
+           |  args1:a COMMA expr:z
+                  {: RESULT = a; RESULT.add(z);
+                     RESULT.addPosition(axleft, zxright); :}
+;
+// Instructions
+stmt      ::= SYSTEM:a DOT OUT DOT PRINTLN LP expr:b RP SEMI:z
+                  {: RESULT = new StmtPrint(b);
+                     RESULT.addPosition(axleft, zxright); :}
+           |  ident:a ASSIGN expr:b SEMI:z
+                  {: RESULT = new StmtAssign(a, b);
+                     RESULT.addPosition(axleft, zxright); :}
+           |  LC:a methBody:b RC:z
+                  {: RESULT = new StmtBlock(b.vars,b.stmts);
+                     RESULT.addPosition(axleft, zxright); :}
+           |  IF:a LP expr:b RP stmt:c ELSE stmt:z
+                  {: RESULT = new StmtIf(b, c, z);
+                     RESULT.addPosition(axleft, zxright); :}
+           |  WHILE:a LP expr:b RP stmt:z
+                  {: RESULT = new StmtWhile(b, z);
+                     RESULT.addPosition(axleft, zxright); :}
+;
+// Expressions
+expr      ::= LIT_INT:a
+                  {: RESULT = new ExprLiteralInt(a);
+                     RESULT.addPosition(axleft, axright); :}
+           |  LIT_BOOL:a
+                  {: RESULT = new ExprLiteralBool(a);
+                     RESULT.addPosition(axleft, axright); :}
+           |  LP:a expr:b RP:z
+                  {: RESULT = b;
+                     RESULT.addPosition(axleft, zxright); :}
+           |  expr:a AND expr:z
+                  {: RESULT = new ExprOpBin(a, main.EnumOper.AND, z);
+                     RESULT.addPosition(axleft, zxright); :}
+           |  expr:a LESS expr:z
+                  {: RESULT = new ExprOpBin(a, main.EnumOper.LESS, z);
+                     RESULT.addPosition(axleft, zxright); :}
+           |  expr:a PLUS expr:z
+                  {: RESULT = new ExprOpBin(a, main.EnumOper.PLUS, z);
+                     RESULT.addPosition(axleft, zxright); :}
+           |  expr:a MINUS expr:z
+                  {: RESULT = new ExprOpBin(a, main.EnumOper.MINUS, z);
+                     RESULT.addPosition(axleft, zxright); :}
+           |  expr:a TIMES expr:z
+                  {: RESULT = new ExprOpBin(a, main.EnumOper.TIMES, z);
+                     RESULT.addPosition(axleft, zxright); :}
+           |  NOT:a expr:z
+                  {: RESULT = new ExprOpUn(main.EnumOper.NOT, z);
+                     RESULT.addPosition(axleft, zxright); :}
+           |  expr:a DOT ident:b LP args:c RP:z
+                  {: RESULT = new ExprCall(a, b, c);
+                     RESULT.addPosition(axleft, zxright); :}
+           |  NEW:a ident:b LP RP:z
+                  {: RESULT = new ExprNew(b);
+                     RESULT.addPosition(axleft, zxright); :}
+           | ident:a
+                  {: RESULT = new ExprIdent(a);
+                     RESULT.addPosition(axleft, axright); :}
+           | THIS:a
+                  {: RESULT = new ExprIdent(new Ident("this"));
+                     RESULT.addPosition(axleft, axright); :}
+;

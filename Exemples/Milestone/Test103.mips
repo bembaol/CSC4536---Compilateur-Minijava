@@ -1,0 +1,103 @@
+.text
+  ## main:
+main:
+  ## t_0 := new Test2
+    addi $sp, $sp, -4
+    sw   $a0, 0($sp)
+    li   $a0, 0
+    j    _new_object
+    sw   $v0, 0($gp)
+    lw   $a0, 0($sp)
+    addi $sp, $sp, 4
+  ## param t_0
+  ## t_1 := call Start<0>
+    addi $sp, $sp, -20
+    sw   $fp, 16($sp)
+    sw   $a3, 12($sp)
+    sw   $a2, 8($sp)
+    sw   $a1, 4($sp)
+    sw   $a0, 0($sp)
+    lw   $a0, 0($gp)
+    move $fp, $sp
+    addi $fp, $fp, 36
+    jal  Start
+    sw   $v0, 4($gp)
+  ## param t_1
+  ## static void call _system_out_println<1>
+    addi $sp, $sp, -4
+    sw   $a0, 0($sp)
+    lw   $a0, 4($gp)
+    jal  _system_out_println
+    lw   $a0, 0($sp)
+    addi $sp, $sp, 4
+  ## param 0
+  ## static void call _system_exit<1>
+    addi $sp, $sp, -4
+    sw   $a0, 0($sp)
+    li   $a0, 0
+    jal  _system_exit
+    lw   $a0, 0($sp)
+    addi $sp, $sp, 4
+  ## Start:
+Start:
+    addi $sp, $sp, -4
+    sw   $ra, 0($sp)
+  ## return 42
+    lw   $ra, -4($fp)
+    li   $v0, 42
+    jr $ra
+  ## zero:
+zero:
+    addi $sp, $sp, -4
+    sw   $ra, 0($sp)
+  ## return 0
+    lw   $ra, -4($fp)
+    li   $v0, 0
+    jr $ra
+#### RUNTIME MIPS (LinkRuntime) ####
+_new_object:
+  ## "void *malloc(int size)"
+  ## IN  $a0 = number of bytes
+  ## OUT $v0 = allocated address
+    li   $v0, 9
+    syscall # sbrk
+  # initialize with zeros
+    move $t0, $a0
+    move $t1, $v0
+__LoopIn:
+  # do until $t0=0
+    beq  $t0, $zero, __LoopOut
+    sb   $zero, 0($t1)
+    addi $t1, $t1,  1 
+    addi $t0, $t0, -1 
+    j    __LoopIn 
+   # done
+__LoopOut:
+    jr   $ra
+equals:  ## boolean Object.equals(Object)
+    seq $v0, $a0, $a1
+    jr   $ra 
+_system_out_println:
+  ## void System.out.println(int x)
+  ## IN  $a0 = integer to print
+    li   $v0,  1
+    syscall # print int
+    li   $a0, 10 # char LineFeed
+    li   $v0, 11
+    syscall # print char
+    jr   $ra
+_system_exit:
+  ## void System.exit(int status)
+  ## IN  $a0 = exit status
+    move $a1, $a0
+    la   $a0, MsgExit
+    li   $v0,  4
+    syscall # print string
+    move $a0, $a1
+    li   $v0,  1
+    syscall # print int
+    li   $v0,  17
+    syscall # exit with status
+.data
+MsgExit: .asciiz "Exit status "
+.text
