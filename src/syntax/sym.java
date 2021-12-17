@@ -8,23 +8,23 @@ package syntax;
 /** CUP generated class containing symbol constants. */
 public class sym {
   /* terminals */
-  public static final int LIT_INT = 36;
+  public static final int LIT_INT = 37;
   public static final int SEMI = 12;
   public static final int INT = 23;
   public static final int PRINTLN = 5;
   public static final int OUT = 4;
-  public static final int LESS = 30;
-  public static final int MINUS = 31;
+  public static final int LESS = 31;
+  public static final int MINUS = 32;
   public static final int STATIC = 7;
-  public static final int NOT = 32;
-  public static final int AND = 28;
+  public static final int NOT = 33;
+  public static final int AND = 29;
   public static final int LP = 17;
-  public static final int COMMA = 35;
+  public static final int COMMA = 36;
   public static final int BOOL = 19;
   public static final int CLASS = 2;
   public static final int RP = 18;
-  public static final int PLUS = 33;
-  public static final int ASSIGN = 29;
+  public static final int PLUS = 34;
+  public static final int ASSIGN = 30;
   public static final int MAIN = 3;
   public static final int IF = 22;
   public static final int THIS = 26;
@@ -38,15 +38,16 @@ public class sym {
   public static final int error = 1;
   public static final int RC = 16;
   public static final int RB = 14;
-  public static final int IDENT = 37;
+  public static final int IDENT = 38;
   public static final int VOID = 10;
-  public static final int TIMES = 34;
+  public static final int TIMES = 35;
   public static final int ELSE = 20;
   public static final int WHILE = 27;
   public static final int PUBLIC = 6;
   public static final int EXTENDS = 21;
-  public static final int LIT_BOOL = 38;
+  public static final int LIT_BOOL = 39;
   public static final int STRING = 8;
+  public static final int LENGTH = 28;
   public static final String[] terminalNames = new String[] {
   "EOF",
   "error",
@@ -76,6 +77,7 @@ public class sym {
   "RETURN",
   "THIS",
   "WHILE",
+  "LENGTH",
   "AND",
   "ASSIGN",
   "LESS",

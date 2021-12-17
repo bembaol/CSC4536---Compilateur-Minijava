@@ -164,8 +164,8 @@ stmt      ::= SYSTEM:a DOT OUT DOT PRINTLN LP expr:b RP SEMI:z
            |  WHILE:a LP expr:b RP stmt:z
                   {: RESULT = new StmtWhile(b, z);
                      RESULT.addPosition(axleft, zxright); :}
-           | IDENT LB expr:a RB ASSIGN expr:z SEMI
-                  {: RESULT = new StmtArrayAssign(a,z);
+           | ident:a LB expr:b RB ASSIGN expr:z SEMI
+                  {: RESULT = new StmtArrayAssign(a,b,z);
                      RESULT.addPosition(axleft, axright); :}
 ;
 // Expressions
@@ -209,12 +209,15 @@ expr      ::= LIT_INT:a
                   {: RESULT = new ExprIdent(new Ident("this"));
                      RESULT.addPosition(axleft, axright); :}
            | expr:a LB expr:z RB
-                  {: RESULT = new ExprIdent(a,z);
-                     RESULT.addPosition(axleft, zxright); :}
+                  {: RESULT = new ExprArrayLookup(a,z);
+                     RESULT.addPosition(axleft, axright); :}
            | expr:a DOT LENGTH
                   {: RESULT = new ExprArrayLength(a);
                      RESULT.addPosition(axleft, axright); :}
-           | NEW INT LB expr:a RB
-              {: RESULT = new ExpArrayNew(a);
+           | NEW INT LB expr:a RB  
+              {: RESULT = new ExprArrayNew(a);
+                     RESULT.addPosition(axleft, axright); :}
+           |  INT LB RB expr:a 
+              {: RESULT = new ExprArrayNew(new ExprLiteralInt("5"));
                      RESULT.addPosition(axleft, axright); :}
 ;

@@ -104,7 +104,7 @@ public class TypeChecking extends AstVisitorDefault {
    * @param type Le nom de type testé
    * @param where Le nœud de l'AST en faute */
   private void checkTypeName(final String type, final AstNode where) {
-    if (type.equals(BOOL) || type.equals(INT)) return;
+    if (type.equals(BOOL) || type.equals(INT) || type.equals(INT_ARRAY)) return;
     if (type.equals(VOID)) return;
     if (lookupKlass(type) != null) return;
     erreur(where, "Unknown Type : " + type);
