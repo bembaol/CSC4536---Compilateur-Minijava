@@ -20,7 +20,7 @@ action code {:
 /* Lexèmes (tokens) */
 terminal CLASS, MAIN, OUT, PRINTLN, PUBLIC, STATIC, STRING, SYSTEM, VOID ;
 terminal DOT, SEMI, LB, RB, LC, RC, LP, RP ;
-terminal BOOL, ELSE, EXTENDS, IF, INT, NEW, RETURN, THIS, WHILE ;
+terminal BOOL, ELSE, EXTENDS, IF, INT, NEW, RETURN, THIS, WHILE, LENGTH ;
 terminal AND, ASSIGN, LESS, MINUS, NOT, PLUS, TIMES, COMMA ;
 /* Lexèmes avec valeur sémantique */
 terminal Integer LIT_INT ;
@@ -113,6 +113,9 @@ type      ::= IDENT:a
            |  BOOL:a
                   {: RESULT = new Type(main.EnumType.BOOL);
                      RESULT.addPosition(axleft, axright); :}
+           | INT:a LB RB
+                  {: RESULT = new Type(main.EnumType.INT_ARRAY);
+                     RESULT.addPosition(axleft, axright); :}
 ;
 // liste éventuellement vide avec Virgule
 formal    ::= type:a ident:z
@@ -161,6 +164,9 @@ stmt      ::= SYSTEM:a DOT OUT DOT PRINTLN LP expr:b RP SEMI:z
            |  WHILE:a LP expr:b RP stmt:z
                   {: RESULT = new StmtWhile(b, z);
                      RESULT.addPosition(axleft, zxright); :}
+           | IDENT LB expr:a RB ASSIGN expr:z SEMI
+                  {: RESULT = new StmtArrayAssign(a,z);
+                     RESULT.addPosition(axleft, axright); :}
 ;
 // Expressions
 expr      ::= LIT_INT:a
@@ -201,5 +207,14 @@ expr      ::= LIT_INT:a
                      RESULT.addPosition(axleft, axright); :}
            | THIS:a
                   {: RESULT = new ExprIdent(new Ident("this"));
+                     RESULT.addPosition(axleft, axright); :}
+           | expr:a LB expr:z RB
+                  {: RESULT = new ExprIdent(a,z);
+                     RESULT.addPosition(axleft, zxright); :}
+           | expr:a DOT LENGTH
+                  {: RESULT = new ExprArrayLength(a);
+                     RESULT.addPosition(axleft, axright); :}
+           | NEW INT LB expr:a RB
+              {: RESULT = new ExpArrayNew(a);
                      RESULT.addPosition(axleft, axright); :}
 ;

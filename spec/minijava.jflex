@@ -31,6 +31,7 @@ Ident      = [:jletter:] [:jletterdigit:]*
 "while"   { return TOKEN(WHILE);   }
 "if"      { return TOKEN(IF);      }
 "else"    { return TOKEN(ELSE);    }
+"length"  { return TOKEN(LENGTH);  }
 //// Operateurs
 "&&"      { return TOKEN(AND);    }
 "<"       { return TOKEN(LESS);    }
