@@ -141,33 +141,61 @@ public class ToMips extends IRvisitorDefault {
 		  mw.et(Reg.V0, Reg.V1); break;
 	  case LESS:
 		  mw.inferieur(Reg.V0, Reg.V1); break;
+	  default:
+		  throw new main.CompilerException("Invalid binary Operator "+q.op);
 	  }
 	  regStore(Reg.V0, q.result);
   }
   
   @Override
+  public void visit(final QAssignArrayFrom q) {
+	  regLoad(Reg.V0, q.arg1);
+	  regLoad(Reg.V1, q.arg2);
+	  mw.plus(Reg.V0, Reg.V1);
+	  mw.loadOffset(Reg.V1, 0, Reg.V0);
+	  regStore(Reg.V1, q.result);
+  }
+  
+  @Override
+  public void visit(final QAssignArrayTo q) {
+	  regLoad(Reg.V0, q.arg1);
+	  regLoad(Reg.V1, q.result);
+	  regLoad(Reg.S0, q.arg2);
+	  mw.plus(Reg.V1, Reg.S0);
+	  mw.storeOffset(Reg.V0, 0, Reg.V1);
+	  regStore(Reg.V1, q.result);
+  }
+  
+  @Override
   public void visit(final QAssignUnary q) {
 	  regLoad(Reg.V0, q.arg1);
-	  mw.not(Reg.V0);
+	  switch(q.op) {
+	  case NOT: mw.not(Reg.V0); break;
+	  default:
+		  throw new main.CompilerException("Invalid unary Operator "+q.op);
+	  }
 	  regStore(Reg.V0, q.result);
   }
   
   @Override
   public void visit(final QCall q) {
-	    final int nbArg = Integer.parseInt(q.arg2.getName());
+	    final String function = q.arg1.getName();
+	    final int nbArg = Integer.parseInt(q.arg2.getName())+1;
 	    if (nbArg != params.size()) {
 	      throw new main.CompilerException("ToMips : Params error");
 	    }
 	    if (nbArg > NBARGS) {
-	      throw new main.CompilerException("ToMips : too many args " + q.arg1.getName());
+	      throw new main.CompilerException("ToMips : too many args " + function);
 	    }
 	    callerSave();
 	    for (int i = 0; i < NBARGS && i < nbArg; i++) {
 	      regLoadSaved(AREGS[i], params.get(i));
 	    }
 	  mw.move(Reg.FP, Reg.SP);
-	  mw.plus(Reg.FP, allocator.frameSize(q.arg1.getName()));
-	  mw.jumpIn(q.arg1.getName());
+	  mw.plus(Reg.SP, -allocator.frameSize(function));
+	  mw.jumpIn(function);
+	  mw.move(Reg.SP, Reg.FP); // restore $sp
+	  callerRestore();
 	  regStore(Reg.V0, q.result);
 	  params.clear();
   }
@@ -198,13 +226,40 @@ public class ToMips extends IRvisitorDefault {
   @Override
   public void visit(final QLabelMeth q) {
 	  mw.label(q.arg1.getName());
-	  push(Reg.RA);
+	  calleeIn();
+  }
+  
+  @Override
+  public void visit(final QLength q) {
+	  push(Reg.A0);
+	  regLoad(Reg.A0, q.arg1);
+	  mw.loadOffset(Reg.V0, 0, Reg.A0);
+	  regStore(Reg.V0, q.result);
+	  pop(Reg.A0);
   }
   
   @Override
   public void visit(final QNew q) {
+	  final Integer size = allocator.classSize(q.arg1.getName());
+	  if (size == null) { // not checked in VarUndef !
+	    throw new main.CompilerException(
+	        "ToMips.QNew : unknown size for class " + q.arg1.getName());
+	  }
 	  push(Reg.A0);
-	  mw.load(Reg.A0, allocator.classSize(q.arg1.getName()));
+	  mw.load(Reg.A0, size);
+	  mw.jump("_new_object");
+	  regStore(Reg.V0, q.result);
+	  pop(Reg.A0);
+  }
+  
+  @Override
+  public void visit(final QNewArray q) {
+	  push(Reg.A0);
+	  regLoad(Reg.V0, q.arg2);
+	  mw.load(Reg.V1, 1);
+	  mw.plus(Reg.V0, Reg.V1);
+	  mw.fois4(Reg.V0);
+	  mw.move(Reg.A0, Reg.V0);
 	  mw.jump("_new_object");
 	  regStore(Reg.V0, q.result);
 	  pop(Reg.A0);

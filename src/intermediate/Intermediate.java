@@ -177,8 +177,8 @@ public class Intermediate extends AstVisitorDefault {
 	  }
 	  else {
 		  setVar(n, newTemp());
+		  add(new QAssign(n.op, getVar(n.expr1), getVar(n.expr2), getVar(n)));
 	  }
-	  add(new QAssign(n.op, getVar(n.expr1), getVar(n.expr2), getVar(n)));
   }
 	  
 	  
