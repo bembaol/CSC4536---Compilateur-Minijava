@@ -141,6 +141,7 @@ public class TypeChecking extends AstVisitorDefault {
   }
   
   @Override
+<<<<<<< HEAD
   public void visit(final ExprArrayLength n) {
 	  defaultVisit(n);
 	  if (!compareType(getType(n.array), INT_ARRAY)) {
@@ -150,6 +151,17 @@ public class TypeChecking extends AstVisitorDefault {
 	  }
 	  setType(n, INT);
   }
+=======
+    public void visit(final ExprArrayLength n) {
+  	  defaultVisit(n);
+  	  if (!compareType(getType(n.array), INT_ARRAY)) {
+  		  erreur(n, "Attempt to get the length of something else than an array");
+  		  setType(n, VOID);
+  		  return;
+  	  }
+  	  setType(n, INT);
+    }
+>>>>>>> 54790d01835b272fea014b90d586e10d7a70c7b9
   
   @Override
   public void visit(final ExprArrayLookup n) {
@@ -161,7 +173,11 @@ public class TypeChecking extends AstVisitorDefault {
 	  }
 	  n.index.accept(this);
 	  if (!compareType(getType(n.index), INT)){
+<<<<<<< HEAD
 		  erreur(n, "Index lookup can only be an Integer");
+=======
+		  erreur(n, "Index lookup can only be Integer");
+>>>>>>> 54790d01835b272fea014b90d586e10d7a70c7b9
 		  setType(n, VOID);
 		  return;
 	  }
@@ -171,6 +187,7 @@ public class TypeChecking extends AstVisitorDefault {
   }
   
   @Override
+<<<<<<< HEAD
   public void visit(final ExprArrayNew n) {
 	  defaultVisit(n);
 	  if (!compareType(getType(n.size), INT)){
@@ -189,6 +206,8 @@ public class TypeChecking extends AstVisitorDefault {
   }
   
   @Override
+=======
+>>>>>>> 54790d01835b272fea014b90d586e10d7a70c7b9
   public void visit(final ExprCall n) {
 	  n.receiver.accept(this);
 	  final InfoKlass kl = lookupKlass(getType(n.receiver));
