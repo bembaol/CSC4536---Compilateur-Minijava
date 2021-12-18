@@ -102,6 +102,27 @@ public class Intermediate extends AstVisitorDefault {
   }
   
   @Override
+  public void visit(final ExprArrayLength n) {
+	  defaultVisit(n);
+	  setVar(n, newTemp());
+	  add(new QLength(getVar(n.array), getVar(n)));
+  }
+  
+  @Override
+  public void visit(final ExprArrayLookup n) {
+	  defaultVisit(n);
+	  setVar(n, newTemp());
+	  add(new QAssignArrayFrom(getVar(n.array), getVar(n.index), getVar(n)));
+  }
+  
+  @Override
+  public void visit(final ExprArrayNew n) {
+	  defaultVisit(n);
+	  setVar(n, newTemp());
+	  add(new QNewArray(newLabel(n.type.toString()), getVar(n.size), getVar(n)));
+  }
+  
+  @Override
   public void visit(final ExprCall n) {
 	  defaultVisit(n);
 	  add(new QParam(getVar(n.receiver)));
@@ -147,7 +168,7 @@ public class Intermediate extends AstVisitorDefault {
 		  case LESS:
 			  rep = newConst(Integer.min(a.getValue(), b.getValue())); break;
 		  case AND:
-			  rep = newConst(((a.getValue()!=0) && (b.getValue()!=0)) ? 1 : 0);
+			  rep = newConst(((a.getValue()!=0) && (b.getValue()!=0)) ? 1 : 0); break;
 		  default:
 			  rep = newConst(0);
 			  break;
@@ -156,8 +177,8 @@ public class Intermediate extends AstVisitorDefault {
 	  }
 	  else {
 		  setVar(n, newTemp());
-		  add(new QAssign(n.op, getVar(n.expr1), getVar(n.expr2), getVar(n)));
 	  }
+	  add(new QAssign(n.op, getVar(n.expr1), getVar(n.expr2), getVar(n)));
   }
 	  
 	  
@@ -178,6 +199,13 @@ public class Intermediate extends AstVisitorDefault {
 	  defaultVisit(n);
 	  setVar(n, newTemp());
 	  add(new QNew(newLabel(n.klassId.name), getVar(n)));
+  }
+  
+  @Override
+  public void visit(final StmtArrayAssign n) {
+	  defaultVisit(n);
+	  setVar(n, lookupVar(n.arrayId.name,n));
+	  add(new QAssignArrayTo(getVar(n.value), getVar(n.index), getVar(n)));
   }
 
   @Override
