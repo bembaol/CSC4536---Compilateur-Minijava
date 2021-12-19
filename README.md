@@ -6,7 +6,7 @@ Code en Java avec utilisation de JFlex et CUP.
 
 Outillage : Make ou Ant, Eclipse (ou Intellij).
 
-- Auteur : Pascal Hennequin
+- Auteur : Pascal Hennequin, Olivier Bemba & Alexis Nordier
 - Version : 2021
 - sous-version : Start
 - Site du Cours : CSC4536  
