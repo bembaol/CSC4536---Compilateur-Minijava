@@ -151,6 +151,8 @@ public class ToMips extends IRvisitorDefault {
   public void visit(final QAssignArrayFrom q) {
 	  regLoad(Reg.V0, q.arg1);
 	  regLoad(Reg.V1, q.arg2);
+	  mw.plus(Reg.V1, 1);
+	  mw.fois4(Reg.V1);
 	  mw.plus(Reg.V0, Reg.V1);
 	  mw.loadOffset(Reg.V1, 0, Reg.V0);
 	  regStore(Reg.V1, q.result);
@@ -161,9 +163,10 @@ public class ToMips extends IRvisitorDefault {
 	  regLoad(Reg.V0, q.arg1);
 	  regLoad(Reg.V1, q.result);
 	  regLoad(Reg.S0, q.arg2);
+	  mw.plus(Reg.S0, 1);
+	  mw.fois4(Reg.S0);
 	  mw.plus(Reg.V1, Reg.S0);
 	  mw.storeOffset(Reg.V0, 0, Reg.V1);
-	  regStore(Reg.V1, q.result);
   }
   
   @Override
@@ -231,11 +234,9 @@ public class ToMips extends IRvisitorDefault {
   
   @Override
   public void visit(final QLength q) {
-	  push(Reg.A0);
-	  regLoad(Reg.A0, q.arg1);
-	  mw.loadOffset(Reg.V0, 0, Reg.A0);
-	  regStore(Reg.V0, q.result);
-	  pop(Reg.A0);
+	  regLoad(Reg.V0, q.arg1);
+	  mw.loadOffset(Reg.V1, 0, Reg.V0);
+	  regStore(Reg.V1, q.result);
   }
   
   @Override
@@ -256,11 +257,13 @@ public class ToMips extends IRvisitorDefault {
   public void visit(final QNewArray q) {
 	  push(Reg.A0);
 	  regLoad(Reg.V0, q.arg2);
+	  mw.move(Reg.S0, Reg.V0);
 	  mw.load(Reg.V1, 1);
 	  mw.plus(Reg.V0, Reg.V1);
 	  mw.fois4(Reg.V0);
 	  mw.move(Reg.A0, Reg.V0);
 	  mw.jumpIn("_new_object");
+	  mw.storeOffset(Reg.S0, 0, Reg.V0);
 	  regStore(Reg.V0, q.result);
 	  pop(Reg.A0);
   }
