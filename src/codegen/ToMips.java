@@ -247,7 +247,7 @@ public class ToMips extends IRvisitorDefault {
 	  }
 	  push(Reg.A0);
 	  mw.load(Reg.A0, size);
-	  mw.jump("_new_object");
+	  mw.jumpIn("_new_object");
 	  regStore(Reg.V0, q.result);
 	  pop(Reg.A0);
   }
@@ -260,7 +260,7 @@ public class ToMips extends IRvisitorDefault {
 	  mw.plus(Reg.V0, Reg.V1);
 	  mw.fois4(Reg.V0);
 	  mw.move(Reg.A0, Reg.V0);
-	  mw.jump("_new_object");
+	  mw.jumpIn("_new_object");
 	  regStore(Reg.V0, q.result);
 	  pop(Reg.A0);
   }
