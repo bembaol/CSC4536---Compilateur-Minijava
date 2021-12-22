@@ -193,7 +193,7 @@ public class TypeChecking extends AstVisitorDefault {
 	  n.receiver.accept(this);
 	  final InfoKlass kl = lookupKlass(getType(n.receiver));
 	  if (kl == null) {
-	    erreur(n, "Attempt to call a non-method (unknown class)");
+	    erreur(n, "Attempt to call a non-method (unknown class) -> "+getType(n.receiver));
 	    setType(n, VOID);
 	    return;
 	  }
@@ -201,7 +201,7 @@ public class TypeChecking extends AstVisitorDefault {
 	  n.methodId.accept(this);
       final InfoMethod m = kl.getScope().lookupMethod(n.methodId.name);
 	  if (m == null) {
-	    erreur(n, "Attempt to call a non-method (unknown method)");
+	    erreur(n, "Attempt to call a non-method (unknown method) -> "+n.methodId.name);
 	    setType(n, VOID);
 	    return;
 	  }

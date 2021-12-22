@@ -131,22 +131,6 @@ public class BuildSymTab extends AstVisitorDefault {
     currentScope = getScope(n);
   } */
   
- 
-  
-
-  
-  
-  
-  /*
-  @Override
-  public void visit(final ExprCall n) {
-	  currentScope = semanticTree.rootScope;
-	  if (currentScope.lookupMethod(n.methodId.name)==null) {
-		  Debug.logErr(n + "BuildSymTab : undefined method -> " + n.methodId.name);
-	  }
-  }
-  */
-  
   @Override
   public void visit(final Klass n) {
 	  setScope(n, currentScope);
@@ -199,34 +183,5 @@ public class BuildSymTab extends AstVisitorDefault {
 	  currentScope.insertVariable(v);
   }
   
-  @Override
-  public void visit(final ExprNew n) {
-	  defaultVisit(n);
-	  String name = n.klassId.name;
-	  InfoKlass v = currentScope.lookupKlass(n.klassId.name);
-	  if (v == null) {
-		  Debug.logErr(n + "BuildSymTab : Undefined klass -> " + name);
-	  }
-  }
-  
-  @Override
-  public void visit(final ExprIdent n) {
-	  defaultVisit(n);
-	  String name = n.varId.name;
-	  InfoVar v = currentScope.lookupVariable(name);
-	  if (v==null) {
-		  Debug.logErr(n + "BuildSymTab : Undefined variable -> " + name);
-	  } 
-  }
-  
-  @Override
-  public void visit(final StmtAssign n) {
-	  defaultVisit(n);
-	  String name = n.varId.name;
-	  InfoVar v = currentScope.lookupVariable(name);
-	  if (v==null) {
-		  Debug.logErr(n + "BuildSymTab : Undefined variable -> " + name);
-	  } 
-  }
 
 }

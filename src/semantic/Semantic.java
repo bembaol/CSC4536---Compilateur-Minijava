@@ -39,6 +39,7 @@ public class Semantic {
       Debug.log("= Table des Symboles (passe1)");
       Debug.log(semanticTree.rootScope.toPrint());
     }
+    
 
     // Construction de la hiérarchie des classes Java
     //  - Contrôle consistance de l'héritage (loop, "Object",..)
@@ -57,6 +58,8 @@ public class Semantic {
     error = tc.getError() || error;
 
     // Contrôle des identificateurs non définis
+    final UndefIdent ui = new UndefIdent(semanticTree);
+    error = ui.getError() || error;
     // Contrôle des déclarations de variables unused dans la même phase
     // NB : le contrôle de type est requis avant
     //...
