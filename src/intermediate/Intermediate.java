@@ -181,17 +181,25 @@ public class Intermediate extends AstVisitorDefault {
 	  }
   }
 	  
-	  
-  
   @Override
   public void visit(final ExprOpUn n) {
 	  defaultVisit(n);
-	  /* if (getVar(n.expr) instanceof IRconst) {
-		  IRconst rep = (IRconst)getVar(n.expr);
-		  setVar(n, newConst(rep.getValue() ? false : true));
-	  } */
+	  if (getVar(n.expr) instanceof IRconst) {
+		  IRconst a = (IRconst)getVar(n.expr);
+		  IRconst rep;
+		  switch(n.op){
+		  case NOT:
+			  rep = newConst(a.getValue()!=0 ? 0 : 1) ; break;
+		  default:
+			  rep = newConst(0);
+			  break;
+		  }
+		  setVar(n,rep);
+	  }
+	  else {
 	  setVar(n, newTemp());
 	  add(new QAssignUnary(n.op, getVar(n.expr), getVar(n)));
+	  }
   }
   
   @Override

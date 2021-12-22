@@ -7,7 +7,7 @@ class Test301 {
 }
 
 class Bar {
-  // int 0a; // invalid identifiier
+  //int 0a; // invalid identifiier
   boolean b;
 
   public int Compute() {
@@ -16,7 +16,7 @@ class Bar {
     // a = 3 / 4; // unknown caractere "/"
     // String s; // Stinrg only in main
     // String[] args; // only in main, (and not usable)
-    // int this; // this reserved keyword
+     int this; // this reserved keyword
     return 0;
   }
 }

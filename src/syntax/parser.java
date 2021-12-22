@@ -5,6 +5,8 @@
 
 package syntax;
 
+import java.util.List;
+import java.util.Arrays;
 import syntax.ast.*;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 import java_cup.runtime.XMLElement;
@@ -316,6 +318,14 @@ public class parser extends java_cup.runtime.lr_parser {
 class CUP$parser$actions {
 
 
+/* Gestion des identifiants interdit (liste non exhaustive) */
+  List<String> forbiddenIdent = Arrays.asList("this");
+  void checkIdent(Ident i) {
+    String s = i.name;
+    if (forbiddenIdent.contains(s)) {
+      throw new main.CompilerException ("Syntax : ident name forbidden : "+s);
+    }
+  }
 /* Classes utilitaires pour construction de paires de listes */
   class KlassBody { /* classBody = (Var|Method)*  */
     AstList<Var> vars;     AstList<Method> methods;
@@ -463,7 +473,7 @@ class CUP$parser$actions {
 		Location zxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$parser$stack.peek()).xleft;
 		Location zxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$parser$stack.peek()).xright;
 		Object z = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
-		 RESULT = new Klass(i, p, k.getVars(), k.getMethods());       
+		 checkIdent(i); RESULT = new Klass(i, p, k.getVars(), k.getMethods());       
                      RESULT.addPosition(axleft, zxright); 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("klass",4, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-5)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
@@ -558,7 +568,7 @@ class CUP$parser$actions {
 		Location zxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$parser$stack.peek()).xleft;
 		Location zxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$parser$stack.peek()).xright;
 		Object z = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
-		 RESULT = new Method(t, i, f, m.getVars(), m.getStmts(), e);
+		 checkIdent(i); RESULT = new Method(t, i, f, m.getVars(), m.getStmts(), e);
                      RESULT.addPosition(axleft, zxright);                        
               CUP$parser$result = parser.getSymbolFactory().newSymbol("method",7, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-11)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
@@ -616,7 +626,7 @@ class CUP$parser$actions {
 		Location zxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$parser$stack.peek()).xleft;
 		Location zxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$parser$stack.peek()).xright;
 		Object z = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
-		 RESULT = new Var(a, b);
+		 checkIdent(b); RESULT = new Var(a, b);
                      RESULT.addPosition(axleft, zxright); 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("variable",10, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
@@ -684,7 +694,7 @@ class CUP$parser$actions {
 		Location zxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$parser$stack.peek()).xleft;
 		Location zxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$parser$stack.peek()).xright;
 		Ident z = (Ident)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
-		 RESULT = new Formal(a, z);
+		 checkIdent(z); RESULT = new Formal(a, z);
                      RESULT.addPosition(axleft, zxright); 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("formal",11, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }

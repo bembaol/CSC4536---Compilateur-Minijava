@@ -25,4 +25,6 @@ hs_err_pid*
 #mips & txt
 *.txt
 *.mips
-Exemples/Milestone/Test103.mips
+
+# Exemple .java
+Exemples/

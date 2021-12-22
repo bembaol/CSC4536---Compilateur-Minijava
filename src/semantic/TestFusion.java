@@ -18,44 +18,46 @@ public class TestFusion extends syntax.ast.AstVisitorDefault {
 	  }
 	  
 /////////////////// Visit ////////////////////
-@Override
-public void visit(final Formal n) {
-out.print(n.varId.name + " (formal), ");
-defaultVisit(n);
-}
+	  @Override
+	  public void visit(final Formal n) {
+		out.print(n.varId.name + " (formal), ");
+		defaultVisit(n);
+	  }
 
-@Override
-public void visit(final Var n) {
-out.print(n.varId.name + (insideMethod ? "( local)" : " (field)") + ", ");
-defaultVisit(n);
-}
-
-@Override
-public void visit(final Method n) {
-out.print(n.methodId.name + "{");
-insideMethod = true;
-defaultVisit(n);
-insideMethod = false;
-out.print("}");
-}
-
-@Override
-public void visit(final Klass n) {
-out.print(n.klassId.name + "{");
-defaultVisit(n);
-out.print("}");
-}
-public void visit(final KlassMain n) {
-	  out.print(n.klassId.name + "{");
-	  defaultVisit(n);
-	  out.print("}");
-}
-
-public void visit(final Stmt n) {
-	  out.print("{");
-	  defaultVisit(n);
-	  out.print("}");
-}
+	  @Override
+	  public void visit(final Var n) {
+		  out.print(n.varId.name + (insideMethod ? "( local)" : " (field)") + ", ");
+		  defaultVisit(n);
+	  }
+	
+	  @Override
+	  public void visit(final Method n) {
+		  out.print(n.methodId.name + "{");
+		  insideMethod = true;
+		  defaultVisit(n);
+		  insideMethod = false;
+		  out.print("}");
+	  }
+	
+	  @Override
+	  public void visit(final Klass n) {
+		  out.print(n.klassId.name + "{");
+		  defaultVisit(n);
+		  out.print("}");
+	  }
+	  
+	  @Override
+	  public void visit(final KlassMain n) {
+		  out.print(n.klassId.name + "{");
+		  defaultVisit(n);
+		  out.print("}");
+	  }
+	  
+	  public void visit(final Stmt n) {
+		  out.print("{");
+		  defaultVisit(n);
+		  out.print("}");
+	  }
 	  
 	  
 }

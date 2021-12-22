@@ -1,5 +1,7 @@
 package semantic;
 
+import java.util.Collection;
+
 import main.Debug;
 import semantic.symtab.*;
 import syntax.ast.*;
@@ -53,8 +55,8 @@ public class BuildSymTab extends AstVisitorDefault {
    * @param sc La portée courante
    * @param kl La définition de classe
    * @return La portée pour la nouvelle classe */
-  private Scope newKlassScope(final Scope sc, final InfoKlass kl) {
-    checkRedef(sc.insertKlass(kl));
+  private Scope newKlassScope(final AstNode n, final Scope sc, final InfoKlass kl) {
+    checkRedef(n, sc.insertKlass(kl));
     final Scope fils = new Scope(sc, kl.getName());
     kl.setScope(fils);
     return fils;
@@ -65,10 +67,10 @@ public class BuildSymTab extends AstVisitorDefault {
    * @param sc La portée courante
    * @param m La définition de la méthode
    * @return La portée pour la nouvelle méthode */
-  private Scope newMethodScope(final Scope sc, final InfoMethod m) {
-    checkRedef(sc.insertMethod(m));
+  private Scope newMethodScope(final AstNode n, final Scope sc, final InfoMethod m) {
+    checkRedef(n, sc.insertMethod(m));
     final Scope fils = new Scope(sc, m.getName() + "_args");
-    for (InfoVar v : m.getArgs()) checkRedef(fils.insertVariable(v));
+    for (InfoVar v : m.getArgs()) checkRedef(n, fils.insertVariable(v));
     final Scope pf = new Scope(fils, m.getName());
     m.setScope(pf);
     return pf;
@@ -77,9 +79,9 @@ public class BuildSymTab extends AstVisitorDefault {
   /** Gestion des redéfinitions dans une même portée.
    * NB : HashMap.add() non null => already exists
    * @param i La déclaration á tester */
-  private void checkRedef(final Info i) {
+  private void checkRedef(final AstNode n, final Info i) {
     if (i != null) {
-      Debug.logErr("BuildSymtab : Duplication d'identificateur " + i);
+      Debug.logErr(n + "BuildSymtab : Duplication d'identificateur " + i);
       error = true;
     }
   }
@@ -91,11 +93,11 @@ public class BuildSymTab extends AstVisitorDefault {
   private void addObjectKlass() {
     Scope sc = currentScope; //==rootScope
     final InfoKlass kl = new InfoKlass("Object", null);
-    sc = newKlassScope(sc, kl);
+    sc = newKlassScope(null, sc, kl);
     final InfoMethod m = new InfoMethod("boolean", "equals",
         new InfoVar("this", kl.getName()),
         new InfoVar("o", kl.getName()));
-    sc = newMethodScope(sc, m);
+    sc = newMethodScope(null, sc, m);
   }
 
   ////////////// Visit ////////////////////////
@@ -129,19 +131,37 @@ public class BuildSymTab extends AstVisitorDefault {
     currentScope = getScope(n);
   } */
   
+ 
+  
+
+  
+  
+  
+  /*
+  @Override
+  public void visit(final ExprCall n) {
+	  currentScope = semanticTree.rootScope;
+	  if (currentScope.lookupMethod(n.methodId.name)==null) {
+		  Debug.logErr(n + "BuildSymTab : undefined method -> " + n.methodId.name);
+	  }
+  }
+  */
+  
+  @Override
   public void visit(final Klass n) {
 	  setScope(n, currentScope);
 	  n.klassId.accept(this);
 	  n.parentId.accept(this);
 	  final InfoKlass kl = new InfoKlass(n.klassId.name, n.parentId.name);
 	  currentKlass = kl;
-	  currentScope = newKlassScope(currentScope, kl);
+	  currentScope = newKlassScope(n, currentScope, kl);
 	  n.vars.accept(this);
 	  n.methods.accept(this);
 	  currentKlass = null;
 	  currentScope = getScope(n); 
   }
   
+  @Override
   public void visit (final Method n) {
 	  setScope(n, currentScope);
 	  n.returnType.accept(this);
@@ -149,15 +169,19 @@ public class BuildSymTab extends AstVisitorDefault {
 	  n.fargs.accept(this);
 	  final java.util.List<InfoVar> formals = new java.util.ArrayList<>(); 
 	  formals.add(new InfoVar("this", currentKlass.getName()));
-	  for (AstNode f : n.fargs) { Formal s = (Formal)f; formals.add(new InfoVar(s.varId.name, s.typeId.name)); }
+	  for (AstNode f : n.fargs) { 
+		  Formal s = (Formal)f;
+		  formals.add(new InfoVar(s.varId.name, s.typeId.name)); 
+	  }
 	  final InfoMethod m = new InfoMethod(n.returnType.name, n.methodId.name,formals);
-	  currentScope = newMethodScope(currentScope, m);
+	  currentScope = newMethodScope(n, currentScope, m);
 	  n.vars.accept(this);
 	  n.stmts.accept(this);
 	  n.returnExp.accept(this);
 	  currentScope = getScope(n);
   }
   
+  @Override
   public void visit (final StmtBlock n) {
 	  setScope(n, currentScope);
 	  currentScope = new Scope(currentScope);
@@ -166,16 +190,43 @@ public class BuildSymTab extends AstVisitorDefault {
 	  currentScope = getScope(n);
   }
   
+  @Override
   public void visit (final Var n) {
 	  n.typeId.accept(this);
 	  n.varId.accept(this);
 	  final InfoVar v = new InfoVar(n.varId.name, n.typeId.name);
+	  checkRedef(n, currentScope.insertVariable(v));
 	  currentScope.insertVariable(v);
   }
   
-  public void visit (final Ident n) {
-	  
+  @Override
+  public void visit(final ExprNew n) {
+	  defaultVisit(n);
+	  String name = n.klassId.name;
+	  InfoKlass v = currentScope.lookupKlass(n.klassId.name);
+	  if (v == null) {
+		  Debug.logErr(n + "BuildSymTab : Undefined klass -> " + name);
+	  }
   }
   
+  @Override
+  public void visit(final ExprIdent n) {
+	  defaultVisit(n);
+	  String name = n.varId.name;
+	  InfoVar v = currentScope.lookupVariable(name);
+	  if (v==null) {
+		  Debug.logErr(n + "BuildSymTab : Undefined variable -> " + name);
+	  } 
+  }
+  
+  @Override
+  public void visit(final StmtAssign n) {
+	  defaultVisit(n);
+	  String name = n.varId.name;
+	  InfoVar v = currentScope.lookupVariable(name);
+	  if (v==null) {
+		  Debug.logErr(n + "BuildSymTab : Undefined variable -> " + name);
+	  } 
+  }
 
 }

@@ -1,7 +1,17 @@
 package syntax;
+import java.util.List;
+import java.util.Arrays;
 import syntax.ast.*; // définition de l'AST
 
 action code {:
+/* Gestion des identifiants interdit (liste non exhaustive) */
+  List<String> forbiddenIdent = Arrays.asList("this");
+  void checkIdent(Ident i) {
+    String s = i.name;
+    if (forbiddenIdent.contains(s)) {
+      throw new main.CompilerException ("Syntax : ident name forbidden : "+s);
+    }
+  }
 /* Classes utilitaires pour construction de paires de listes */
   class KlassBody { /* classBody = (Var|Method)*  */
     AstList<Var> vars;     AstList<Method> methods;
@@ -72,7 +82,7 @@ klassList ::= /* vide */
                      RESULT.addPosition(axleft, zxright); :}
 ;
 klass     ::= CLASS:a ident:i parent:p LC klassBody:k RC:z
-                  {: RESULT = new Klass(i, p, k.getVars(), k.getMethods());       
+                  {: checkIdent(i); RESULT = new Klass(i, p, k.getVars(), k.getMethods());       
                      RESULT.addPosition(axleft, zxright); :}
 ;
 parent    ::= /* mot vide */
@@ -90,7 +100,7 @@ klassBody ::= /* vide */
 ;
 method      ::= PUBLIC:a type:t ident:i LP formals:f RP
               LC methBody:m RETURN expr:e SEMI RC:z
-                  {: RESULT = new Method(t, i, f, m.getVars(), m.getStmts(), e);
+                  {: checkIdent(i); RESULT = new Method(t, i, f, m.getVars(), m.getStmts(), e);
                      RESULT.addPosition(axleft, zxright);                        :}
 ;
 methBody  ::= /* vide */
@@ -101,7 +111,7 @@ methBody  ::= /* vide */
                   {: RESULT = a; RESULT.stmts.add(z);     :}
 ;
 variable  ::= type:a ident:b SEMI:z
-                  {: RESULT = new Var(a, b);
+                  {: checkIdent(b); RESULT = new Var(a, b);
                      RESULT.addPosition(axleft, zxright); :}
 ;
 type      ::= IDENT:a
@@ -119,7 +129,7 @@ type      ::= IDENT:a
 ;
 // liste éventuellement vide avec Virgule
 formal    ::= type:a ident:z
-                  {: RESULT = new Formal(a, z);
+                  {: checkIdent(z); RESULT = new Formal(a, z);
                      RESULT.addPosition(axleft, zxright); :}
 ;
 formals   ::= /* vide */
