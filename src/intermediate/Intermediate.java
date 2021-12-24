@@ -160,20 +160,25 @@ public class Intermediate extends AstVisitorDefault {
 		  IRconst rep;
 		  switch(n.op){
 		  case PLUS:
-			  rep = newConst(a.getValue()+b.getValue()); break;
+			  rep = newConst(a.getValue()+b.getValue()); setVar(n, rep); break;
 		  case MINUS:
-			  rep = newConst(a.getValue()-b.getValue()); break;
+			  rep = newConst(a.getValue()-b.getValue()); setVar(n, rep); break;
 		  case TIMES:
-			  rep = newConst(a.getValue()*b.getValue()); break;
+			  rep = newConst(a.getValue()*b.getValue()); setVar(n, rep); break;
 		  case LESS:
-			  rep = newConst(Integer.min(a.getValue(), b.getValue())); break;
+			  rep = newConst(Integer.min(a.getValue(), b.getValue())); setVar(n, rep); break;
 		  case AND:
-			  rep = newConst(((a.getValue()!=0) && (b.getValue()!=0)) ? 1 : 0); break;
-		  default:
-			  rep = newConst(0);
+			  IRlabel L0 = newLabel();
+			  setVar(n, newTemp());
+			  add(new QCopy(getVar(n.expr1), getVar(n)));
+			  add(new QJumpCond(L0, getVar(n.expr1)));
+			  add(new QCopy(getVar(n.expr2), getVar(n)));
+			  add(new QLabel(L0));
 			  break;
+		  default:
+			  throw new main.CompilerException("Unknown binary operator");
 		  }
-		  setVar(n, rep);
+		  
 	  }
 	  else {
 		  setVar(n, newTemp());
@@ -191,8 +196,7 @@ public class Intermediate extends AstVisitorDefault {
 		  case NOT:
 			  rep = newConst(a.getValue()!=0 ? 0 : 1) ; break;
 		  default:
-			  rep = newConst(0);
-			  break;
+			  throw new main.CompilerException("Unknown unary operator");
 		  }
 		  setVar(n,rep);
 	  }
