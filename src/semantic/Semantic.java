@@ -58,9 +58,12 @@ public class Semantic {
     error = tc.getError() || error;
 
     // Contrôle des identificateurs non définis
+    Debug.log("= Listes des identifiants non définis");
     final UndefIdent ui = new UndefIdent(semanticTree);
     error = ui.getError() || error;
     // Contrôle des déclarations de variables unused dans la même phase
+    Debug.log("= Liste des variables non utilisées");
+    Debug.log(ui.getUnusedVar());
     // NB : le contrôle de type est requis avant
     //...
   }
