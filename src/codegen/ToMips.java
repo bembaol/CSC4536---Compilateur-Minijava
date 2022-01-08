@@ -12,7 +12,7 @@ public class ToMips extends IRvisitorDefault {
   protected static final int NBARGS = 4;
 
   /** Les 4 registres pour les arguments de fonction. */
-  protected static final Reg[] AREGS = {Reg.A0, Reg.A1, Reg.A2, Reg.A3};
+  protected static final Reg[] AREGS = {Reg.A0, Reg.A1, Reg.A2, Reg.A3, };
 
   /** Les registres "s" a sauvegarder. (not usefull) */
   protected static final Reg[] S_REG_USED_LIST = {};
